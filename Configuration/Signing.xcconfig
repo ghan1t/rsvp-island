@@ -1,0 +1,3 @@
+// Personal signing settings belong in Signing.local.xcconfig.
+// The optional include keeps clean clones buildable without local credentials.
+#include? "Signing.local.xcconfig"
