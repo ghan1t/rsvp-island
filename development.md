@@ -52,7 +52,7 @@ Both scripts use separate directories beneath `.build/`, stop any running develo
 1. Confirm the `textformat` menu-bar icon appears and there is no Dock icon.
 2. Copy text and choose **Read Clipboard Now**.
 3. Grant Accessibility access, select text in another app, and press Control–Option–R.
-4. Verify Space pauses, Escape closes, Up/Down changes speed, and Left/Right steps only while paused.
+4. Verify Space pauses, Escape closes, Up/Down changes speed, and Left/Right navigate sentence boundaries while playing or paused.
 5. Confirm focus returns to the originating application.
 6. Test both a notched display and a non-notched/external display when available.
 
