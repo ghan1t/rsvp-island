@@ -28,6 +28,40 @@ struct SettingsMenuView: View {
             }
 
             HStack {
+                Text("First word pause")
+                Slider(
+                    value: Binding(
+                        get: { settings.firstWordPauseSeconds },
+                        set: { settings.setFirstWordPause($0) }
+                    ),
+                    in: 0...3,
+                    step: 0.1
+                )
+                Text(settings.firstWordPauseSeconds == 0
+                    ? "Off"
+                    : String(format: "%.1f s", settings.firstWordPauseSeconds))
+                    .monospacedDigit()
+                    .frame(width: 48, alignment: .trailing)
+            }
+
+            HStack {
+                Text("Sentence skip window")
+                Slider(
+                    value: Binding(
+                        get: { settings.sentenceSkipWindowSeconds },
+                        set: { settings.setSentenceSkipWindow($0) }
+                    ),
+                    in: 0...3,
+                    step: 0.1
+                )
+                Text(settings.sentenceSkipWindowSeconds == 0
+                    ? "Off"
+                    : String(format: "%.1f s", settings.sentenceSkipWindowSeconds))
+                    .monospacedDigit()
+                    .frame(width: 48, alignment: .trailing)
+            }
+
+            HStack {
                 Text("Shortcut")
                 Spacer()
                 KeyboardShortcuts.Recorder(for: .startReading)

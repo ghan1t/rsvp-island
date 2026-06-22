@@ -11,6 +11,7 @@ final class ReaderController {
 
     @ObservationIgnored private let acquisition: TextAcquisitionCoordinator
     @ObservationIgnored private let tokenizer: RSVPTokenizer
+    @ObservationIgnored private let sentenceNavigator = SentenceNavigator()
     @ObservationIgnored private let settings: ReaderSettingsStore
     @ObservationIgnored private let displayResolver: DisplayResolver
     @ObservationIgnored private let panelController: ReaderPanelController
@@ -88,10 +89,14 @@ final class ReaderController {
         panelController.show(controller: self, metrics: metrics)
         panelController.takeFocus()
         installKeyboardMonitor()
-        beginPlayback(sessionID: session.id, delayForExpansion: true)
+        beginPlayback(sessionID: session.id, delayForExpansion: true, pauseOnCurrentWord: true)
     }
 
-    private func beginPlayback(sessionID: UUID, delayForExpansion: Bool) {
+    private func beginPlayback(
+        sessionID: UUID,
+        delayForExpansion: Bool,
+        pauseOnCurrentWord: Bool = false
+    ) {
         playbackTask?.cancel()
         playbackTask = Task { [weak self] in
             if delayForExpansion {
@@ -102,6 +107,11 @@ final class ReaderController {
             }
             guard !Task.isCancelled, let self, self.currentSession?.id == sessionID else { return }
             self.presentationState = .playing
+
+            if pauseOnCurrentWord, let token = self.currentToken {
+                await self.waitForConfiguredWordPause(on: token)
+                guard !Task.isCancelled, self.currentSession?.id == sessionID else { return }
+            }
 
             while let token = self.currentToken, self.currentSession?.id == sessionID {
                 let milliseconds = Double(60_000) / Double(self.wordsPerMinute) * token.delayMultiplier
@@ -118,6 +128,16 @@ final class ReaderController {
                 self.currentSession = session
             }
         }
+    }
+
+    private func waitForConfiguredWordPause(on token: RSVPToken) async {
+        // Playback already holds this word for its WPM-based token duration below.
+        // Only wait for the difference so the configured pause is the total time
+        // the word remains visible, rather than extra time added to normal playback.
+        let regularTokenDelay = 60 / Double(wordsPerMinute) * token.delayMultiplier
+        let additionalDelay = max(settings.firstWordPauseSeconds - regularTokenDelay, 0)
+        guard additionalDelay > 0 else { return }
+        try? await Task.sleep(for: .milliseconds(Int64(additionalDelay * 1_000)))
     }
 
     func togglePause() {
@@ -140,10 +160,24 @@ final class ReaderController {
         }
     }
 
-    func step(by amount: Int) {
-        guard presentationState == .paused, var session = currentSession else { return }
-        session.index = min(max(session.index + amount, 0), session.tokens.count - 1)
+    func skipSentence(_ direction: SentenceNavigator.Direction) {
+        guard presentationState == .playing || presentationState == .paused,
+              var session = currentSession else { return }
+        session.index = sentenceNavigator.destination(
+            from: session.index,
+            direction: direction,
+            tokens: session.tokens,
+            wordsPerMinute: wordsPerMinute,
+            skipWindowSeconds: settings.sentenceSkipWindowSeconds
+        )
         currentSession = session
+        if presentationState == .playing {
+            beginPlayback(
+                sessionID: session.id,
+                delayForExpansion: false,
+                pauseOnCurrentWord: true
+            )
+        }
     }
 
     func closeImmediately() {
@@ -180,8 +214,8 @@ final class ReaderController {
             case 53: self.closeImmediately()
             case 126: self.changeSpeed(by: 25)
             case 125: self.changeSpeed(by: -25)
-            case 123: self.step(by: -1)
-            case 124: self.step(by: 1)
+            case 123: self.skipSentence(.backward)
+            case 124: self.skipSentence(.forward)
             default: return event
             }
             return nil
