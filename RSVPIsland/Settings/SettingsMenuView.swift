@@ -51,20 +51,20 @@ struct SettingsMenuView: View {
                     systemImage: accessibility.isTrusted ? "checkmark.circle" : "exclamationmark.circle"
                 )
                 Spacer()
-                Button("Request Access") { accessibility.requestTrustPrompt() }
+                if !accessibility.isTrusted {
+                    Button("Request Access") { accessibility.requestTrustPrompt() }
+                }
             }
 
-            Button("Open Accessibility Settings") {
-                let path = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
-                if let url = URL(string: path) { NSWorkspace.shared.open(url) }
-            }
             Button("Read Clipboard Now") { reader.startFromClipboard() }
                 .keyboardShortcut(.return, modifiers: [])
 
             Divider()
             HStack {
                 Button("About") {
-                    NSApp.orderFrontStandardAboutPanel(nil)
+                    let icon = NSApp.applicationIconImage.copy() as! NSImage
+                    icon.size = NSSize(width: 256, height: 256)
+                    NSApp.orderFrontStandardAboutPanel(options: [.applicationIcon: icon])
                     NSApp.activate()
                 }
                 Spacer()

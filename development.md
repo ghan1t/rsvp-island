@@ -33,6 +33,20 @@ xcodebuild \
 
 For interactive testing, open `RSVPIsland.xcodeproj`, select the `RSVPIsland` scheme and **My Mac**, then press Command-R. Use **Product → Clean Build Folder** after project membership or package changes.
 
+Alternatively, build and launch the app directly from the current worktree:
+
+```sh
+./build-and-run.sh
+```
+
+This uses the signing configuration from `Configuration/Signing.xcconfig`. To build with an ad-hoc signature instead:
+
+```sh
+./build-and-run-ad-hoc.sh
+```
+
+Both scripts use separate directories beneath `.build/`, stop any running development copy, and launch the newly built app.
+
 ## Manual smoke test
 
 1. Confirm the `textformat` menu-bar icon appears and there is no Dock icon.
