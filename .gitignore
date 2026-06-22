@@ -8,3 +8,4 @@ xcuserdata/
 *.xcscmblueprint
 Configuration/Signing.local.xcconfig
 tmp/
+.idea/

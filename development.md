@@ -12,6 +12,27 @@
 
 The Xcode project uses file-system-synchronized source roots. New Swift files beneath `RSVPIsland/` or `RSVPIslandTests/` are normally added to their corresponding target automatically.
 
+## Runtime flow
+
+1. `AppDelegate` registers the global shortcut defined in `ShortcutNames`.
+2. `ReaderController` asks `TextAcquisitionCoordinator` for text before taking focus.
+3. Accessibility selection wins; clipboard text is the fallback.
+4. `RSVPTokenizer` creates Unicode-safe tokens, ORP segments, and timing multipliers.
+5. `DisplayResolver` chooses the display and calculates notch/canvas geometry.
+6. `ReaderPanelController` hosts `ReaderRootView` in a transparent `NSPanel`.
+7. `ReaderController` drives animation, playback, keyboard controls, cleanup, and focus restoration.
+
+`AppContainer.shared` constructs and retains the application services. There is one reader session and one lazily created panel.
+
+## Important constraints
+
+- Text stays in memory and is cleared when a session closes.
+- Do not synthesize Command-C or modify the clipboard.
+- Do not add networking, telemetry, OCR, ScreenCaptureKit, private APIs, or a helper daemon.
+- The panel window frame is fixed; SwiftUI content performs the visible animation.
+- Launch at login is disabled by default during development and must remain opt-in.
+- Accessibility code uses `@preconcurrency import ApplicationServices` and remains main-actor isolated.
+
 ## Build and test
 
 From the repository root:
