@@ -10,6 +10,9 @@
 
 RSVP Island is a menu-bar speed reader for macOS. It uses Rapid Serial Visual Presentation (RSVP) to show one word at a time on a compact island at the top of the screen, extending out of the camera notch. Each word is aligned around a red Optimal Recognition Point (ORP), helping your eyes stay in one place while you read.
 
+> [!CAUTION]
+> **AI disclosure:** This project has been entirely vibe coded with AI, and its code has not been reviewed by a human.
+
 <p align="center">
   <img src="docs/media/island-in-action.gif" width="640" alt="RSVP Island opening, displaying words, and closing">
 </p>
@@ -24,6 +27,12 @@ RSVP Island is a menu-bar speed reader for macOS. It uses Rapid Serial Visual Pr
 - Includes a customizable global shortcut and optional launch at login.
 - Runs unobtrusively from the menu bar without a Dock icon.
 - Processes text locally and clears it when the reading session ends.
+
+### macOS security warning
+
+RSVP Island currently uses an ad-hoc code signature. It is not signed with an Apple Developer ID certificate and has not been notarized by Apple. As a result, macOS Gatekeeper will warn that the app is not from a trusted or identified developer and may prevent it from opening normally.
+
+Only override this warning if you obtained the app from a source you trust and accept the risk described in the AI disclosure above. An ad-hoc signature protects the app bundle from unnoticed modification after signing, but it does not verify the developer's identity.
 
 ### Get started
 
