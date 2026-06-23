@@ -1,0 +1,44 @@
+name: Xcode CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-analyze:
+    name: Build, Test, and Analyze
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and test
+        run: |
+          set -o pipefail
+
+          xcodebuild \
+            -project RSVPIsland.xcodeproj \
+            -scheme RSVPIsland \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath .build/ci \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY=- \
+            DEVELOPMENT_TEAM= \
+            test
+
+      - name: Analyze
+        run: |
+          set -o pipefail
+
+          xcodebuild \
+            -project RSVPIsland.xcodeproj \
+            -scheme RSVPIsland \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath .build/ci \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY=- \
+            DEVELOPMENT_TEAM= \
+            analyze
